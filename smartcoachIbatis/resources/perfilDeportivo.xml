@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="smartcoachIbatis.dao.PerfilDeportivoDao">
+	<select id="getPerfilDeportivo" parameterType="String" resultType="smartcoachIbatis.model.PerfilDeportivo">
+      SELECT 
+          CODDEPORTIVO as codDeportivo,
+          EXPERIENCIA as experiencia,
+          HORAINITRABAJO as horaInicioTrabajo,
+          HORAFINTRABAJO as horaFinTrabajo,
+          PATOLOGIAS as patologias,
+          CODPROFESION as codProfesion
+       FROM PERFILDEPORTIVO
+	   WHERE CODDEPORTIVO = #{codDeportivo}
+	</select>
+	
+	<select id="getPerfilesDeportivos" resultType="smartcoachIbatis.model.PerfilDeportivo">
+      SELECT 
+          CODDEPORTIVO as codDeportivo,
+          EXPERIENCIA as experiencia,
+          HORAINITRABAJO as horaInicioTrabajo,
+          HORAFINTRABAJO as horaFinTrabajo,
+          PATOLOGIAS as patologias,
+          CODPROFESION as codProfesion
+       FROM PERFILDEPORTIVO
+	</select>
+	
+	<update id="updatePerfilDeportivo" parameterType="smartcoachIbatis.model.PerfilDeportivo">
+	   UPDATE PERFILDEPORTIVO SET
+          EXPERIENCIA = #{experiencia},
+          HORAINITRABAJO = #{horaIniTrabajo},
+          HORAFINTRABAJO = #{horaFinTrabajo},
+          PATOLOGIAS = #{patologias},
+          CODPROFESION = #{codProfesion}
+	   WHERE
+	      CODDEPORTIVO = #{codDeportivo}   
+	</update>
+	<delete id="deletePerfilDeportivo">
+	   DELETE FROM PERFILDEPORTIVO WHERE CODDEPORTIVO=#{codDeportivo}
+	</delete>
+	   
+	<insert id="addPerfilDeportivo"  parameterType="smartcoachIbatis.model.PerfilDeportivo" >
+	   INSERT INTO PERFILDEPORTIVO (codDeportivo,experiencia,horaIniTrabajo,horaFinTrabajo,patologias,codProfesion) VALUES (
+	   #{codDeportivo},
+	   #{experiencia},
+	   #{horaIniTrabajo},
+	   #{horaFinTrabajo},
+	   #{patologias},
+	   #{codProfesion})
+    </insert> 	
+</mapper>

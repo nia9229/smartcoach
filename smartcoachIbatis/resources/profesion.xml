@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="smartcoachIbatis.dao.ProfesionDao">
+	<select id="getProfesion" parameterType="String" resultType="smartcoachIbatis.model.Profesion">
+      SELECT 
+         CODPROFESION as codProfesion
+         NOMBRE as nombre
+       FROM PROFESION
+	   WHERE CODPROFESION = #{codProfesion}
+	</select>
+	
+	<select id="getProfesiones" resultType="smartcoachIbatis.model.Profesion">
+      SELECT 
+         CODPROFESION as codProfesion
+         NOMBRE as nombre
+       FROM PROFESION
+	</select>
+	
+	<update id="updateProfesion" parameterType="smartcoachIbatis.model.Profesion">
+	   UPDATE PROFESION SET
+          NOMBRE = #{nombre},
+	   WHERE CODPROFESION = #{codProfesion} 
+	</update>
+	<delete id="deleteProfesion">
+	   DELETE FROM PROFESION WHERE CODPROFESION = #{codProfesion} 
+	</delete>
+	   
+	<insert id="addProfesion"  parameterType="smartcoachIbatis.model.Profesion" >
+	   INSERT INTO PROFESION (codProfesion,nombre) VALUES (
+	   #{codProfesion},
+	   #{nombre})
+    </insert> 	
+</mapper>

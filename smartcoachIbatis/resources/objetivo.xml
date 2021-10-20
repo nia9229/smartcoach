@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+           PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="smartcoachIbatis.dao.ObjetivoDao">
+	<select id="getObjetivo" parameterType="String" resultType="smartcoachIbatis.model.Objetivo">
+      SELECT 
+          CODOBJETIVO as codDeportivo,
+          NOMBRE as nombre,
+          DESCRIPCION as descripcion,
+          FECHAINICIO as fechaInicio,
+          FECHAPREVISTAFIN as fechaPrevistaFin,
+          FECHAFIN as fechaFin,
+          CODDEPORTIVO as codDeportivo
+       FROM OBJETIVO
+	   WHERE CODOBJETIVO = #{codObjetivo}
+	</select>
+	
+	<select id="getObjetivos" resultType="smartcoachIbatis.model.Objetivo">
+      SELECT 
+          CODOBJETIVO as codDeportivo,
+          NOMBRE as nombre,
+          DESCRIPCION as descripcion,
+          FECHAINICIO as fechaInicio,
+          FECHAPREVISTAFIN as fechaPrevistaFin,
+          FECHAFIN as fechaFin,
+          CODDEPORTIVO as codDeportivo
+       FROM OBJETIVO
+	</select>
+	
+	<update id="updateObjetivo" parameterType="smartcoachIbatis.model.Objetivo">
+	   UPDATE OBJETIVO SET
+          NOMBRE = #{nombre},
+          DESCRIPCION = #{descripcion},
+          FECHAINICIO = #{fechaInicio},
+          FECHAPREVISTAFIN = #{fechaPrevistaFin},
+          FECHAFIN = #{fechaFin},
+          CODDEPORTIVO = #{codDeportivo}
+	   WHERE CODOBJETIVO = #{codObjetivo} 
+	</update>
+	<delete id="deleteObjetivo">
+	   DELETE FROM OBJETIVO WHERE CODOBJETIVO = #{codObjetivo} 
+	</delete>
+	   
+	<insert id="addObjetivo"  parameterType="smartcoachIbatis.model.Objetivo" >
+	   INSERT INTO OBJETIVO (codObjetivo,nombre,descripcion,fechaInicio,fechaPrevistaFin,fechaFin,codDeportivo) VALUES (
+	   #{codObjetivo},
+	   #{nombre},
+	   #{descripcion},
+	   #{fechaInicio},
+	   #{fechaPrevistaFin},
+	   #{fechaFin},
+	   #{codDeportivo})
+    </insert> 	
+    
+    <select id="nuevoObjetivoPerfil" parameterType="java.util.HashMap" statementType="CALLABLE"> 
+        {call nuevoObjetivoPerfil (#{codObjetivo, mode = IN, javaType=String}, 
+                          #{nombre, mode = IN, javaType=String},
+                          #{descripcion, mode = IN, javaType=String},
+                          #{fechaInicio, mode = IN, javaType=Date},
+                          #{fechaPrevistaFin, mode = IN, javaType=Date},
+                          #{codDeportivo, mode = IN, javaType=String},
+                          #{salida, mode = INOUT, jdbcType=INTEGER})}
+    </select>
+</mapper>

@@ -1,0 +1,1 @@
+Design and building of smartcoach database and persistence layer. smartcoach is a sports and nutritional advice management system.

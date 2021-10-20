@@ -1,0 +1,138 @@
+-----------------------------------------------------
+-- Script con la estructura, datos y procedimiento de una version reducida de smartcoach
+-- para su persistencia.
+-- Base de datos: smartcoachSimple
+-- @asignatura: Desarrollo de Sistemas de Informacion
+-- @titulación: Ingeniería Informática
+-- @curso: 2020/2021
+-- @autor: Nicolas Amigo Sañudo
+-----------------------------------------------------
+----------------------Creacion base de datos--------------------------
+SET DATEFORMAT dmy
+
+CREATE DATABASE smartcoachSimple
+GO
+
+USE smartcoachSimple
+GO
+
+CREATE TABLE "OBJETIVO" (
+		"CODOBJETIVO" CHAR(5) NOT NULL,
+		"NOMBRE" VARCHAR(30) NOT NULL,
+		"DESCRIPCION" VARCHAR(300) NOT NULL,
+		"FECHAINICIO" DATE NOT NULL,
+		"FECHAPREVISTAFIN" DATE NOT NULL,
+		"FECHAFIN" DATE NULL,
+		"CODDEPORTIVO" CHAR(5) NOT NULL
+	)
+GO
+
+CREATE TABLE "PERFILDEPORTIVO" (
+		"CODDEPORTIVO" CHAR(5) NOT NULL,
+		"EXPERIENCIA" VARCHAR(12) NOT NULL,
+		"HORAINITRABAJO" TIME NULL,
+		"HORAFINTRABAJO" TIME NULL,
+		"PATOLOGIAS" VARCHAR(400) NOT NULL,
+		"CODPROFESION" CHAR(5) NULL
+	)
+GO
+
+CREATE TABLE "PROFESION" (
+		"CODPROFESION" CHAR(5) NOT NULL,
+		"NOMBRE" VARCHAR(30) NOT NULL
+	)
+GO
+
+ALTER TABLE "OBJETIVO" ADD CONSTRAINT "OBJETIVO_PK" PRIMARY KEY
+	("CODOBJETIVO")
+GO
+
+ALTER TABLE "OBJETIVO" ADD CONSTRAINT "FECHAPREVISTA_CK" CHECK ((FECHAPREVISTAFIN > FECHAINICIO))
+GO
+
+ALTER TABLE "OBJETIVO" ADD CONSTRAINT "FECHAFIN_CK" CHECK ((FECHAFIN >= FECHAPREVISTAFIN))
+GO
+
+ALTER TABLE "PERFILDEPORTIVO" ADD CONSTRAINT "PERFILDEPORTIVO_PK" PRIMARY KEY
+	("CODDEPORTIVO")
+GO
+
+ALTER TABLE "PERFILDEPORTIVO" ADD CONSTRAINT "EXPERIENCIA_CK" CHECK ((EXPERIENCIA in ('PRINCIPIANTE','INTERMEDIO','AVANZADO')))
+GO
+
+ALTER TABLE "PROFESION" ADD CONSTRAINT "PROFESION_PK" PRIMARY KEY
+	("CODPROFESION")
+GO
+
+ALTER TABLE "OBJETIVO" ADD CONSTRAINT "OBJETIVO_PERFILDEPORTIVO_FK" FOREIGN KEY
+	("CODDEPORTIVO")
+	REFERENCES "PERFILDEPORTIVO"
+	("CODDEPORTIVO")
+GO
+
+ALTER TABLE "PERFILDEPORTIVO" ADD CONSTRAINT "PERFILDEPORTIVO_PROFESION_FK" FOREIGN KEY
+	("CODPROFESION")
+	REFERENCES "PROFESION"
+	("CODPROFESION")
+GO
+
+INSERT INTO PROFESION VALUES('PR000','Agricultor')
+INSERT INTO PROFESION VALUES('PR001','Profesor')
+INSERT INTO PROFESION VALUES('PR002','Medico')
+INSERT INTO PROFESION VALUES('PR003','Camarero')
+INSERT INTO PROFESION VALUES('PR004','Abogado')
+INSERT INTO PROFESION VALUES('PR005','Ingeniero')
+INSERT INTO PROFESION VALUES('PR006','Jardinero')
+
+INSERT INTO PERFILDEPORTIVO VALUES('T0000','PRINCIPIANTE','05:00','12:00','','PR000')
+INSERT INTO PERFILDEPORTIVO VALUES('T0001','AVANZADO','08:00','17:00','','PR005')
+
+INSERT INTO OBJETIVO VALUES('O0000','Sobrepeso','','01/01/2020','01/07/2020','01/07/2020','T0000')
+INSERT INTO OBJETIVO VALUES('O0001','Aumento musculo','','01/01/2021','01/04/2021','08/04/2021','T0000')
+INSERT INTO OBJETIVO VALUES('O0002','Normopeso','','01/01/2021','01/07/2021',null,'T0000')
+INSERT INTO OBJETIVO VALUES('O0003','Calidad muscular','','01/05/2021','01/07/2021',null,'T0001')
+INSERT INTO OBJETIVO VALUES('O0004','Competicion','','01/07/2021','01/08/2021',null,'T0001')
+GO
+----------------------Procedimiento-------------------------
+/**
+* Procedimiento para crear un nuevo objetivo de un determinado perfil
+*/
+CREATE PROCEDURE nuevoObjetivoPerfil @codObjetivo CHAR(5), @nombre VARCHAR(30), @descripcion VARCHAR(300),
+@fechaInicio DATE, @fechaPrevistaFin DATE, @codDeportivo CHAR(5), @salida INT OUTPUT
+AS BEGIN 
+	BEGIN TRY
+		DECLARE @TranCounter INT;
+    	SET @TranCounter = @@TRANCOUNT;
+    	IF @TranCounter > 0
+    		SAVE TRANSACTION ProcedureSave;
+    	ELSE 
+		BEGIN TRANSACTION
+			INSERT INTO OBJETIVO(CODOBJETIVO,NOMBRE,DESCRIPCION,FECHAINICIO,FECHAPREVISTAFIN,CODDEPORTIVO) VALUES (@codObjetivo,@nombre,@descripcion,@fechaInicio,@fechaPrevistaFin,@codDeportivo)
+			IF @TranCounter = 0 
+       			COMMIT TRANSACTION
+     			SET @salida = 0
+	END TRY
+	BEGIN CATCH
+		IF @TranCounter = 0 begin
+        	ROLLBACK TRANSACTION;
+		END
+        ELSE BEGIN
+            IF XACT_STATE() = -1 begin
+                ROLLBACK TRANSACTION ProcedureSave;
+            END
+        END
+        SET @salida = -1
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+        SELECT @ErrorMessage = ERROR_MESSAGE();
+        SELECT @ErrorSeverity = ERROR_SEVERITY();
+        SELECT @ErrorState = ERROR_STATE();
+        RAISERROR (@ErrorMessage, -- Message text.
+                   @ErrorSeverity, -- Severity.
+                   @ErrorState -- State.
+                   );
+	END CATCH
+END
+RETURN;
+GO
